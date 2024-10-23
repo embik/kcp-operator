@@ -1,0 +1,151 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.1
+  name: rootshards.operator.kcp.io
+spec:
+  group: operator.kcp.io
+  names:
+    kind: RootShard
+    listKind: RootShardList
+    plural: rootshards
+    singular: rootshard
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: RootShard is the Schema for the kcpinstances API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: RootShardSpec defines the desired state of RootShard
+            properties:
+              caRef:
+                description: |-
+                  CARef is an optional reference to a cert-manager Certificate resources
+                  which can be used as CA for the kcp instance.
+                properties:
+                  name:
+                    default: ""
+                    description: |-
+                      Name of the referent.
+                      This field is effectively required, but due to backwards compatibility is
+                      allowed to be empty. Instances of this type with an empty value here are
+                      almost certainly wrong.
+                      More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              cache:
+                description: Cache configures the cache server (with a Kubernetes-like
+                  API) used by a sharded kcp instance.
+                properties:
+                  embedded:
+                    properties:
+                      enabled:
+                        type: boolean
+                    required:
+                    - enabled
+                    type: object
+                type: object
+              etcd:
+                description: Etcd configures the etcd cluster that this shard should
+                  be using.
+                properties:
+                  cert:
+                    properties:
+                      secretRef:
+                        description: |-
+                          LocalObjectReference contains enough information to let you locate the
+                          referenced object inside the same namespace.
+                        properties:
+                          name:
+                            default: ""
+                            description: |-
+                              Name of the referent.
+                              This field is effectively required, but due to backwards compatibility is
+                              allowed to be empty. Instances of this type with an empty value here are
+                              almost certainly wrong.
+                              More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    required:
+                    - secretRef
+                    type: object
+                  endpoints:
+                    items:
+                      type: string
+                    type: array
+                required:
+                - cert
+                - endpoints
+                type: object
+              hostname:
+                description: |-
+                  Hostname is the external name of the KCP instance. This should be matched by a DNS
+                  record pointing to the kcp-front-proxy Service's external IP address.
+                type: string
+              image:
+                description: ImageSpec defines settings for using a specific image.
+                properties:
+                  imagePullSecrets:
+                    description: 'Optional: A list of secret references that should
+                      be used as image pull secrets (e.g. when a private registry
+                      is used).'
+                    items:
+                      description: |-
+                        LocalObjectReference contains enough information to let you locate the
+                        referenced object inside the same namespace.
+                      properties:
+                        name:
+                          default: ""
+                          description: |-
+                            Name of the referent.
+                            This field is effectively required, but due to backwards compatibility is
+                            allowed to be empty. Instances of this type with an empty value here are
+                            almost certainly wrong.
+                            More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          type: string
+                      type: object
+                      x-kubernetes-map-type: atomic
+                    type: array
+                  repository:
+                    description: The repository to use for all KCP containers. Defaults
+                      to `ghcr.io/kcp-dev/kcp`.
+                    type: string
+                  tag:
+                    type: string
+                type: object
+            required:
+            - cache
+            - etcd
+            - hostname
+            type: object
+          status:
+            description: RootShardStatus defines the observed state of RootShard
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
